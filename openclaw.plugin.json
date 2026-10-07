@@ -2,7 +2,7 @@
   "id": "multimodal-embeddings",
   "name": "Multimodal Embeddings (OpenAI-compatible)",
   "description": "Memory embedding provider for any OpenAI-compatible /v1/embeddings server, with image and audio indexing for models that support it (e.g. EmbeddingGemma 2 on llama.cpp).",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "activation": {
     "onStartup": true
   },

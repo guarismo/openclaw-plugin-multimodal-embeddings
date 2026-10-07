@@ -6,6 +6,22 @@ An OpenClaw plugin that registers a memory embedding provider named `multimodal-
 
 OpenClaw's built-in multimodal memory indexing only works with Gemini. This plugin lets you index images and audio with a model you run yourself, so the files never leave your machine. It also works as a plain text embedding provider for any OpenAI-compatible server, and it adds the task prefixes that EmbeddingGemma needs.
 
+## Screenshots
+
+An agent finding media in its memory by describing it. The files have camera-style names (`IMG_0003.png`, `VOICE_0004.opus`), so the match comes from the content.
+
+Image search in the Control UI:
+
+![Agent finds "the picture of the desert with red rocks" with memory_search and returns the image](https://raw.githubusercontent.com/guarismo/openclaw-plugin-multimodal-embeddings/main/docs/screenshots/image-search.png)
+
+Audio search in the Control UI, returning a playable voice note:
+
+![Agent finds "the voice note about the birthday party" with memory_search and returns VOICE_0004.opus](https://raw.githubusercontent.com/guarismo/openclaw-plugin-multimodal-embeddings/main/docs/screenshots/audio-search.png)
+
+The same from Discord:
+
+![Discord: "find the photo of the mountain at sunset" returns the matching photo with its search score](https://raw.githubusercontent.com/guarismo/openclaw-plugin-multimodal-embeddings/main/docs/screenshots/discord-image-search.jpg)
+
 ## Requirements
 
 - OpenClaw 2026.9.8 or newer.
