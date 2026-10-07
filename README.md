@@ -1,6 +1,6 @@
 # Multimodal Embeddings (OpenAI-compatible)
 
-An OpenClaw plugin that registers a memory embedding provider named `multimodal-embeddings`. It sends text, and optionally images and audio, to any server that exposes an OpenAI-compatible `/v1/embeddings` endpoint.
+An OpenClaw plugin that registers a memory embedding provider named `multimodal-embeddings`. It sends text, and optionally images and audio, to any server that exposes an OpenAI-compatible `/v1/embeddings` endpoint. It also adds an agent tool, `multimodal_media_search`, that finds photos and recordings by describing them.
 
 ## Why
 
@@ -108,6 +108,33 @@ Set these under `plugins.entries["multimodal-embeddings"].config`.
 | `batchSize` | integer 1-256 | `32` | Inputs per request. Values above 256 are clamped to 256. |
 
 The EmbeddingGemma preset uses `task: search result | query: ` for queries and `title: none | text: ` for documents.
+
+## Finding media: `multimodal_media_search`
+
+Use this tool, not `memory_search`, to find photos and recordings.
+
+`memory_search` ranks media and text together, and in a real memory the media rarely surfaces. Three things work against it, and none of them can be configured: text-to-text similarity runs higher than text-to-image or text-to-audio similarity with the same model; memory-core applies a 30-day recency decay to files in `extraPaths`; and a media file has no keyword text, so it gets none of the 30% keyword share of the score. With a few months of food photos in an agent's memory, notes about food outrank every photo.
+
+`multimodal_media_search` searches only the image and audio vectors that memory already stored for the calling agent, so none of that applies. It does not embed media again; it embeds the query the same way memory does and compares it with the stored vectors, which takes tens of milliseconds.
+
+Parameters:
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `query` | string | required | What the photo shows or the recording says. `description` is accepted as an alias. |
+| `kind` | `image` \| `audio` \| `any` | `any` | Limit the search to one kind. |
+| `maxResults` | integer 1-10 | `3` | Number of results. |
+
+It returns workspace paths with scores, plus the median score of everything searched. Scores are relative: a good match is clearly above the median (for EmbeddingGemma 2, typically 0.1 or more).
+
+The tool only works for agents whose `memory.search.provider` is `multimodal-embeddings`. Agents with a tool allow list need `multimodal_media_search` added to it (and to `tools.sandbox.tools.alsoAllow` for sandboxed agents). OpenClaw asks for capability consent the first time the plugin registers a tool: `openclaw plugins enable multimodal-embeddings --accept-capabilities`.
+
+Small models pick the right tool more reliably with a line in the agent's `AGENTS.md`, for example:
+
+```markdown
+When asked to find a photo, picture, screenshot, voice note or audio clip, call `multimodal_media_search`
+with a description of its content, then send the best match as an attachment using its `path` exactly as given.
+```
 
 ## Notes
 

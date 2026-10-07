@@ -2,12 +2,17 @@
   "id": "multimodal-embeddings",
   "name": "Multimodal Embeddings (OpenAI-compatible)",
   "description": "Memory embedding provider for any OpenAI-compatible /v1/embeddings server, with image and audio indexing for models that support it (e.g. EmbeddingGemma 2 on llama.cpp).",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "activation": {
     "onStartup": true
   },
   "contracts": {
-    "embeddingProviders": ["multimodal-embeddings"]
+    "embeddingProviders": [
+      "multimodal-embeddings"
+    ],
+    "tools": [
+      "multimodal_media_search"
+    ]
   },
   "configSchema": {
     "type": "object",
@@ -22,24 +27,47 @@
           "properties": {
             "modalities": {
               "type": "array",
-              "items": { "enum": ["image", "audio"] },
+              "items": {
+                "enum": [
+                  "image",
+                  "audio"
+                ]
+              },
               "description": "Media this model can embed in the same space as text. Omit for a text-only model."
             },
             "mediaFormat": {
-              "enum": ["content-parts"],
+              "enum": [
+                "content-parts"
+              ],
               "description": "Request shape for media inputs. content-parts: llama.cpp / OpenRouter {content:[...]} objects."
             },
             "preset": {
-              "enum": ["none", "embeddinggemma"],
+              "enum": [
+                "none",
+                "embeddinggemma"
+              ],
               "description": "Built-in prompt prefixes. Defaults to embeddinggemma for model ids containing 'embeddinggemma', otherwise none."
             },
-            "queryPrefix": { "type": "string", "description": "Overrides the preset's query prefix." },
-            "documentPrefix": { "type": "string", "description": "Overrides the preset's document prefix." },
+            "queryPrefix": {
+              "type": "string",
+              "description": "Overrides the preset's query prefix."
+            },
+            "documentPrefix": {
+              "type": "string",
+              "description": "Overrides the preset's document prefix."
+            },
             "mediaLabel": {
-              "enum": ["include", "omit"],
+              "enum": [
+                "include",
+                "omit"
+              ],
               "description": "Whether to send memory's 'Image file: <path>' label with media. omit embeds the media alone."
             },
-            "dimensions": { "type": "integer", "minimum": 1, "description": "Expected vector size; vectors are checked against it." }
+            "dimensions": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Expected vector size; vectors are checked against it."
+            }
           }
         }
       },
@@ -47,8 +75,16 @@
         "type": "boolean",
         "description": "Convert media the server cannot decode (webp, heic, ogg, opus, m4a, ...) with ffmpeg before sending. Default true."
       },
-      "ffmpegPath": { "type": "string", "description": "ffmpeg binary. Default: ffmpeg on PATH." },
-      "batchSize": { "type": "integer", "minimum": 1, "maximum": 256, "description": "Inputs per request. Default 32." }
+      "ffmpegPath": {
+        "type": "string",
+        "description": "ffmpeg binary. Default: ffmpeg on PATH."
+      },
+      "batchSize": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 256,
+        "description": "Inputs per request. Default 32."
+      }
     }
   }
 }

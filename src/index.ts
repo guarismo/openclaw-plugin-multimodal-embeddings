@@ -7,6 +7,7 @@ import {
 } from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
 import { parsePluginSettings, resolveModelSettings, type PluginSettings } from "./config.js";
 import { prepareMedia } from "./media.js";
+import { createMediaSearchTool, TOOL_NAME } from "./media-search.js";
 import { buildRequestInput, checkVectors, mediaParts, type EmbeddingInput, type Role } from "./request.js";
 
 const PLUGIN_ID = "multimodal-embeddings";
@@ -102,5 +103,20 @@ export default definePluginEntry({
       create: createProvider(settings),
     };
     api.registerEmbeddingProvider(adapter as unknown as Parameters<typeof api.registerEmbeddingProvider>[0]);
+
+    // Embeds the query exactly as memory embeds this agent's queries (same endpoint, model, prefix).
+    const embedQuery = async (search: { model?: string; remote?: unknown }, config: unknown, query: string) => {
+      const { provider } = await createProvider(settings)({
+        model: search.model ?? "",
+        config,
+        remote: search.remote as CreateOptions["remote"],
+      });
+      return await provider.embed(query, { inputType: "query" });
+    };
+    api.registerTool(
+      ((ctx: Parameters<typeof createMediaSearchTool>[0]) =>
+        createMediaSearchTool(ctx, PROVIDER_ID, embedQuery)) as unknown as Parameters<typeof api.registerTool>[0],
+      { name: TOOL_NAME },
+    );
   },
 });

@@ -28,3 +28,26 @@ declare module "openclaw/plugin-sdk/memory-core-host-engine-embeddings" {
     excludedHeaderNames: string[],
   ): Array<[string, string]>;
 }
+
+declare module "openclaw/plugin-sdk/memory-core-host-engine-foundation" {
+  export function resolveMemorySearchConfig(config: unknown, agentId: string): unknown;
+  export function resolveAgentWorkspaceDir(config: unknown, agentId: string): string;
+}
+
+declare module "openclaw/plugin-sdk/memory-core-host-engine-knn" {
+  export function cosineSimilarity(a: number[], b: number[]): number;
+  export function decodeMemoryEmbedding(bytes: Uint8Array): number[];
+  export function openOpenClawAgentDatabaseReadOnly(options: { agentId: string }):
+    | { found: false; reason: string }
+    | {
+        found: true;
+        database: {
+          db: { prepare(sql: string): { all(...params: unknown[]): unknown[] } };
+          close(): void;
+        };
+      };
+}
+
+declare module "openclaw/plugin-sdk/memory-core-host-engine-storage" {
+  export const MEMORY_INDEX_CHUNKS_TABLE: string;
+}
