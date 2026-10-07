@@ -6,21 +6,11 @@ An OpenClaw plugin that registers a memory embedding provider named `multimodal-
 
 OpenClaw's built-in multimodal memory indexing only works with Gemini. This plugin lets you index images and audio with a model you run yourself, so the files never leave your machine. It also works as a plain text embedding provider for any OpenAI-compatible server, and it adds the task prefixes that EmbeddingGemma needs.
 
-## Screenshots
+## Demo
 
-An agent finding media in its memory by describing it. The files have camera-style names (`IMG_0003.png`, `VOICE_0004.opus`), so the match comes from the content.
+An agent asked for "the pictures of the eggs benedict breakfast" calls `multimodal_media_search`, which ranks the photos already indexed in its memory, and attaches the best matches. The photos have meaningless names (`input-a6f0a32c-….jpg`), so the match comes from the content. Click the image to play the 48-second recording.
 
-Image search in the Control UI:
-
-![Agent finds "the picture of the desert with red rocks" with memory_search and returns the image](https://raw.githubusercontent.com/guarismo/openclaw-plugin-multimodal-embeddings/main/docs/screenshots/image-search.png)
-
-Audio search in the Control UI, returning a playable voice note:
-
-![Agent finds "the voice note about the birthday party" with memory_search and returns VOICE_0004.opus](https://raw.githubusercontent.com/guarismo/openclaw-plugin-multimodal-embeddings/main/docs/screenshots/audio-search.png)
-
-The same from Discord:
-
-![Discord: "find the photo of the mountain at sunset" returns the matching photo with its search score](https://raw.githubusercontent.com/guarismo/openclaw-plugin-multimodal-embeddings/main/docs/screenshots/discord-image-search.jpg)
+[![multimodal_media_search finding the eggs benedict photos among 92 indexed photos, with the tool's input, ranked results and the attached photo](https://raw.githubusercontent.com/guarismo/openclaw-plugin-multimodal-embeddings/main/docs/media/media-search-demo.png)](https://github.com/guarismo/openclaw-plugin-multimodal-embeddings/blob/main/docs/media/media-search-demo.mp4)
 
 ## Requirements
 
