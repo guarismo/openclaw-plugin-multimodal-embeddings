@@ -1,0 +1,66 @@
+{
+  "name": "openclaw-plugin-multimodal-embeddings",
+  "version": "0.1.0",
+  "description": "OpenClaw memory embedding provider for OpenAI-compatible endpoints, with image and audio support for multimodal models.",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run --config ./vitest.config.ts",
+    "validate": "npm run build && clawhub package validate . --out .clawhub-validation"
+  },
+  "files": [
+    "dist",
+    "openclaw.plugin.json",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "openclaw": ">=2026.9.8"
+  },
+  "peerDependenciesMeta": {
+    "openclaw": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "openclaw": "2026.9.8",
+    "typescript": "5.9.3",
+    "vitest": "^3.2.0",
+    "@types/node": "^24.0.0"
+  },
+  "openclaw": {
+    "extensions": [
+      "./dist/index.js"
+    ],
+    "compat": {
+      "pluginApi": ">=2026.9.8"
+    },
+    "build": {
+      "openclawVersion": "2026.9.8"
+    },
+    "install": {
+      "clawhubSpec": "clawhub:openclaw-plugin-multimodal-embeddings",
+      "defaultChoice": "clawhub",
+      "minHostVersion": ">=2026.9.8"
+    },
+    "release": {
+      "publishToClawHub": true
+    }
+  },
+  "pluginInspector": {
+    "version": 1,
+    "plugin": {
+      "id": "multimodal-embeddings",
+      "priority": "high",
+      "seams": [
+        "plugin-runtime"
+      ],
+      "sourceRoot": ".",
+      "expect": {
+        "registrations": [
+          "registerEmbeddingProvider"
+        ]
+      }
+    }
+  },
+  "license": "MIT"
+}
