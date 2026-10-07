@@ -62,9 +62,11 @@ function readMediaRows(agentId: string, model: string) {
   }
 }
 
-export function createMediaSearchTool(ctx: ToolContext, providerId: string, embed: Embedder) {
+export function createMediaSearchTool(ctx: ToolContext, providerId: string, embed: Embedder, direct = true) {
   return {
     name: TOOL_NAME,
+    // Visible without a tool_search round-trip; small local models answer one step sooner.
+    ...(direct ? { catalogMode: "direct-only" as const } : {}),
     description:
       "Find photos, images, screenshots, voice notes and audio recordings in your memory by describing what they show or say " +
       "(e.g. 'burger on a kitchen scale', 'voice note about a pasta recipe'). Searches only media files, so text notes never " +
@@ -116,7 +118,8 @@ export function createMediaSearchTool(ctx: ToolContext, providerId: string, embe
       const text =
         hits.length === 0
           ? `No matching ${kind ?? "media"} found among ${ranked.searched} files.`
-          : `Searched ${ranked.searched} media files (median score ${ranked.median.toFixed(3)}; a good match is clearly above it):\n${lines.join("\n")}`;
+          : `Searched ${ranked.searched} media files (median score ${ranked.median.toFixed(3)}; a good match is clearly above it):\n${lines.join("\n")}\n` +
+            "To show a result to the user, attach the file using its path exactly as listed; describing it is not enough.";
       return { content: [{ type: "text", text }], details };
     },
   };

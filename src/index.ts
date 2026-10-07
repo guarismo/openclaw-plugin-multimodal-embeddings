@@ -115,7 +115,7 @@ export default definePluginEntry({
     };
     api.registerTool(
       ((ctx: Parameters<typeof createMediaSearchTool>[0]) =>
-        createMediaSearchTool(ctx, PROVIDER_ID, embedQuery)) as unknown as Parameters<typeof api.registerTool>[0],
+        createMediaSearchTool(ctx, PROVIDER_ID, embedQuery, settings.mediaSearchToolMode === "direct")) as unknown as Parameters<typeof api.registerTool>[0],
       { name: TOOL_NAME },
     );
   },

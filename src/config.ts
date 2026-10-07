@@ -16,6 +16,7 @@ export type PluginSettings = {
   convertMedia: boolean;
   ffmpegPath: string;
   batchSize: number;
+  mediaSearchToolMode: "direct" | "catalog";
 };
 
 type RawModelSettings = {
@@ -46,6 +47,7 @@ export function parsePluginSettings(raw: unknown): PluginSettings {
     convertMedia: cfg.convertMedia !== false,
     ffmpegPath: typeof cfg.ffmpegPath === "string" && cfg.ffmpegPath.trim() ? cfg.ffmpegPath.trim() : "ffmpeg",
     batchSize,
+    mediaSearchToolMode: cfg.mediaSearchToolMode === "catalog" ? "catalog" : "direct",
   };
 }
 

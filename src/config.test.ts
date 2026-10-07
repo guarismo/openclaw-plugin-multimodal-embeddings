@@ -7,7 +7,14 @@ const DP = "title: none | text: ";
 describe("parsePluginSettings", () => {
   it("applies defaults for missing or non-object input", () => {
     for (const raw of [undefined, null, "x", 5, [], {}]) {
-      expect(parsePluginSettings(raw)).toEqual({ models: {}, convertMedia: true, ffmpegPath: "ffmpeg", batchSize: 32 });
+      expect(parsePluginSettings(raw)).toEqual({ models: {}, convertMedia: true, ffmpegPath: "ffmpeg", batchSize: 32, mediaSearchToolMode: "direct" });
+    }
+  });
+
+  it("keeps the media search tool direct unless catalog is chosen", () => {
+    expect(parsePluginSettings({ mediaSearchToolMode: "catalog" }).mediaSearchToolMode).toBe("catalog");
+    for (const v of ["direct", "other", undefined, 1]) {
+      expect(parsePluginSettings({ mediaSearchToolMode: v }).mediaSearchToolMode).toBe("direct");
     }
   });
 

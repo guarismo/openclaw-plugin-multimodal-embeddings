@@ -84,6 +84,13 @@
         "minimum": 1,
         "maximum": 256,
         "description": "Inputs per request. Default 32."
+      },
+      "mediaSearchToolMode": {
+        "enum": [
+          "direct",
+          "catalog"
+        ],
+        "description": "direct: multimodal_media_search is always in the agent's tool list (one step faster with Tool Search on). catalog: it is found through tool_search like other tools, which keeps prompts smaller. Default direct."
       }
     }
   }
