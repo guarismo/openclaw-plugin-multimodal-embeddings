@@ -2,6 +2,23 @@
   "name": "openclaw-plugin-multimodal-embeddings",
   "version": "0.1.0",
   "description": "OpenClaw memory embedding provider for OpenAI-compatible endpoints, with image and audio support for multimodal models.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/guarismo/openclaw-plugin-multimodal-embeddings.git"
+  },
+  "homepage": "https://github.com/guarismo/openclaw-plugin-multimodal-embeddings#readme",
+  "bugs": {
+    "url": "https://github.com/guarismo/openclaw-plugin-multimodal-embeddings/issues"
+  },
+  "keywords": [
+    "openclaw",
+    "openclaw-plugin",
+    "embeddings",
+    "multimodal",
+    "memory",
+    "llama.cpp",
+    "embeddinggemma"
+  ],
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
