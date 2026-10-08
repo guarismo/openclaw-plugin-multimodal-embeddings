@@ -145,7 +145,10 @@ Notes:
 - Models without audio support reject audio inputs with a clear server error; mixed text-and-image batches worked with every multimodal model.
 - Qwen3-VL-Embedding separated images most clearly (the right image led the best wrong one by at least 0.21 cosine, against 0.08 for EmbeddingGemma 2 and 0.005 for jina-embeddings-v4). EmbeddingGemma 2 is the only one tested that embeds audio.
 - Qwen3-VL-Embedding and GME document their instruction as a chat system message; the plugin sends it as a text prefix, which worked in this test but is not their documented format.
-- Only llama.cpp was tested. vLLM, Ollama, LM Studio and OpenRouter were not; vLLM is expected to need a different request shape for images.
+- Other servers:
+  - **Ollama 0.40.0** (`/v1/embeddings`): text works (embeddinggemma, qwen3-embedding:0.6b, nomic-embed-text and bge-m3 gave the same results as on llama.cpp). Media does not: the endpoint rejects content parts ("input.content must be a string"), and Ollama's `embeddinggemma-2` builds run only on its MLX engine, so they do not load on Linux/NVIDIA at all.
+  - **vLLM 0.31.0** (`/v1/embeddings`, `--runner pooling`) with Qwen3-VL-Embedding-2B: text works (8/8). Media sent as content parts in `input` is rejected; vLLM takes one media item per request in a chat-style `messages` field instead. With that format the same model found 9/9 images, so vLLM needs a second request format in the plugin, which it does not have yet. On a 6 GB card vLLM also needed `--enforce-eager`, `--limit-mm-per-prompt '{"image":1,"video":0}'` and a `max_pixels` cap to start.
+  - LM Studio and OpenRouter were not tested.
 - Only EmbeddingGemma 2 was also tested end to end through OpenClaw memory indexing and `multimodal_media_search`.
 
 Not compatible: models that split text and media across two models (CLIP, SigLIP, CLAP, nomic-embed-text + nomic-embed-vision), multi-vector models (ColPali, ColQwen, colnomic), and cloud APIs with their own request formats (Voyage multimodal, Cohere embed).
