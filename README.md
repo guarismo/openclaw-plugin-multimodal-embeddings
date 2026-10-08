@@ -126,6 +126,30 @@ When asked to find a photo, picture, screenshot, voice note or audio clip, call 
 with a description of its content, then send the best match as an attachment using its `path` exactly as given.
 ```
 
+## Tested models
+
+Tested with seven embedding models on llama.cpp's `llama-server` (build b11457, OpenAI-compatible `/v1/embeddings`), Q8_0 GGUFs on a 6 GB RTX 3050, through the plugin's provider. The test set is small (8 notes with paraphrased questions, 9 images, 8 voice notes); it shows that each model works with the plugin, not how well it ranks a large library.
+
+| Model (GGUF) | Text | Images | Audio | Plugin settings (`models.<id>`) | Server settings |
+| --- | --- | --- | --- | --- | --- |
+| EmbeddingGemma 2 (`ggml-org/embeddinggemma-2-GGUF` + mmproj) | 8/8 | 9/9 | 8/8 | `modalities: ["image","audio"]`; prefixes are built in | `--ubatch-size` ≥ input length (non-causal); ctx = batch = ubatch |
+| Qwen3-VL-Embedding-2B (`mradermacher/Qwen3-VL-Embedding-2B-GGUF` + mmproj) | 8/8 | 9/9 | – | `modalities: ["image"]`, `preset: "none"`, optional `queryPrefix: "Instruct: Retrieve images or text relevant to the user's query.\nQuery: "` | `--pooling last`; ctx 2048, ubatch 1024 to fit 6 GB |
+| GME Qwen2-VL-2B (`mradermacher/gme-Qwen2-VL-2B-Instruct-GGUF` + mmproj) | 8/8 | 8/9 | – | `modalities: ["image"]`, `preset: "none"`, `queryPrefix: "Instruct: Find an image that matches the given text.\nQuery: "` | `--pooling last` (the GGUF declares none, which the OpenAI endpoint rejects); ctx 2048, ubatch 1024 |
+| jina-embeddings-v4, retrieval (`jinaai/jina-embeddings-v4-text-retrieval-GGUF` + mmproj) | 8/8 | 9/9 | – | `modalities: ["image"]`, `preset: "none"`, `queryPrefix: "Query: "`, `documentPrefix: "Passage: "` | `--pooling mean`; on 6 GB: ubatch 512 and `--image-max-tokens 512`, otherwise image encoding runs out of memory |
+| Qwen3-Embedding-0.6B (`Qwen/Qwen3-Embedding-0.6B-GGUF`) | 8/8 | – | – | `preset: "none"`, `queryPrefix: "Instruct: Given a web search query, retrieve relevant passages that answer the query\nQuery:"`, `documentPrefix: ""` | – |
+| nomic-embed-text-v1.5 (`nomic-ai/nomic-embed-text-v1.5-GGUF`) | 7/8 | – | – | `preset: "none"`, `queryPrefix: "search_query: "`, `documentPrefix: "search_document: "` | ctx 2048 (trained length) |
+| bge-m3 (`gpustack/bge-m3-GGUF`) | 8/8 | – | – | `preset: "none"` | – |
+
+Notes:
+
+- Models without audio support reject audio inputs with a clear server error; mixed text-and-image batches worked with every multimodal model.
+- Qwen3-VL-Embedding separated images most clearly (the right image led the best wrong one by at least 0.21 cosine, against 0.08 for EmbeddingGemma 2 and 0.005 for jina-embeddings-v4). EmbeddingGemma 2 is the only one tested that embeds audio.
+- Qwen3-VL-Embedding and GME document their instruction as a chat system message; the plugin sends it as a text prefix, which worked in this test but is not their documented format.
+- Only llama.cpp was tested. vLLM, Ollama, LM Studio and OpenRouter were not; vLLM is expected to need a different request shape for images.
+- Only EmbeddingGemma 2 was also tested end to end through OpenClaw memory indexing and `multimodal_media_search`.
+
+Not compatible: models that split text and media across two models (CLIP, SigLIP, CLAP, nomic-embed-text + nomic-embed-vision), multi-vector models (ColPali, ColQwen, colnomic), and cloud APIs with their own request formats (Voyage multimodal, Cohere embed).
+
 ## Notes
 
 ### Reindex after any change
