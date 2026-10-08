@@ -1,6 +1,6 @@
 {
   "name": "openclaw-plugin-multimodal-embeddings",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "OpenClaw memory embedding provider for OpenAI-compatible endpoints, with image and audio support for multimodal models.",
   "repository": {
     "type": "git",

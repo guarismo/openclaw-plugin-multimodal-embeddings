@@ -1,14 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ModelSettings } from "./config.js";
-import {
-  buildRequestInput,
-  checkVectors,
-  inputText,
-  isNativeMedia,
-  mediaParts,
-  modalityOf,
-  type EmbeddingInput,
-} from "./request.js";
+import { buildRequestInput, checkVectors, inputText, isNativeMedia, mediaParts, modalityOf, type EmbeddingInput, planRequests, chatMessagesBody } from "./request.js";
 
 const model = (over: Partial<ModelSettings> = {}): ModelSettings => ({
   modalities: ["image", "audio"],
@@ -194,5 +186,27 @@ describe("checkVectors", () => {
 
   it("skips the dimension check when dimensions is undefined", () => {
     expect(() => checkVectors([[1], [1, 2]], 2)).not.toThrow();
+  });
+});
+
+describe("chat-messages format (vLLM)", () => {
+  const img = { text: "Image file: a.jpg", parts: [{ type: "text" as const, text: "Image file: a.jpg" }, { type: "inline-data" as const, mimeType: "image/jpeg", data: "QQ==" }] };
+  const inputs = ["plain text", img, { text: "text object" }, img];
+
+  it("batches everything for content-parts", () => {
+    expect(planRequests(inputs, "content-parts")).toEqual({ batched: [0, 1, 2, 3], single: [] });
+  });
+
+  it("sends media inputs alone and keeps text batched for chat-messages", () => {
+    expect(planRequests(inputs, "chat-messages")).toEqual({ batched: [0, 2], single: [1, 3] });
+  });
+
+  it("wraps content parts in one user message", () => {
+    const req = { content: [{ type: "image_url" as const, image_url: { url: "data:image/jpeg;base64,QQ==" } }] };
+    expect(chatMessagesBody("m", req)).toEqual({ model: "m", messages: [{ role: "user", content: req.content }] });
+  });
+
+  it("wraps a plain string as a text part", () => {
+    expect(chatMessagesBody("m", "hello")).toEqual({ model: "m", messages: [{ role: "user", content: [{ type: "text", text: "hello" }] }] });
   });
 });

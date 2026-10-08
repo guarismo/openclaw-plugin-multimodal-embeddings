@@ -1,4 +1,4 @@
-import type { ModelSettings } from "./config.js";
+import type { MediaFormat, ModelSettings } from "./config.js";
 
 /** The structured input memory-core hands to embedding providers. */
 export type EmbeddingInput =
@@ -77,6 +77,25 @@ export function buildRequestInput(
     }
   }
   return { content };
+}
+
+/**
+ * Which inputs go in one batched `input` request and which need a request of their own.
+ * content-parts (llama.cpp, OpenRouter): everything is batched.
+ * chat-messages (vLLM): each input with media is sent alone as a chat `messages` request;
+ * plain text stays batched.
+ */
+export function planRequests(inputs: EmbeddingInput[], format: MediaFormat): { batched: number[]; single: number[] } {
+  const batched: number[] = [];
+  const single: number[] = [];
+  inputs.forEach((input, i) => (format === "chat-messages" && mediaParts(input).length > 0 ? single : batched).push(i));
+  return { batched, single };
+}
+
+/** vLLM-style body for one media input: the content parts become a single user message. */
+export function chatMessagesBody(model: string, request: RequestInput) {
+  const content = typeof request === "string" ? [{ type: "text" as const, text: request }] : request.content;
+  return { model, messages: [{ role: "user", content }] };
 }
 
 export function checkVectors(vectors: number[][], expected: number, dimensions?: number): number[][] {

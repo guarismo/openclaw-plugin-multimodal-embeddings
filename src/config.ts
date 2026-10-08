@@ -1,5 +1,5 @@
 export type Modality = "image" | "audio";
-export type MediaFormat = "content-parts";
+export type MediaFormat = "content-parts" | "chat-messages";
 export type Preset = "none" | "embeddinggemma";
 
 export type ModelSettings = {
@@ -65,7 +65,7 @@ export function resolveModelSettings(settings: PluginSettings, model: string): M
         : "none";
   return {
     modalities,
-    mediaFormat: "content-parts",
+    mediaFormat: raw.mediaFormat === "chat-messages" ? "chat-messages" : "content-parts",
     queryPrefix: typeof raw.queryPrefix === "string" ? raw.queryPrefix : PRESETS[preset].query,
     documentPrefix: typeof raw.documentPrefix === "string" ? raw.documentPrefix : PRESETS[preset].document,
     mediaLabel: raw.mediaLabel === "omit" ? "omit" : "include",

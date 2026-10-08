@@ -8,7 +8,7 @@ import {
 import { parsePluginSettings, resolveModelSettings, type PluginSettings } from "./config.js";
 import { prepareMedia } from "./media.js";
 import { createMediaSearchTool, TOOL_NAME } from "./media-search.js";
-import { buildRequestInput, checkVectors, mediaParts, type EmbeddingInput, type Role } from "./request.js";
+import { buildRequestInput, chatMessagesBody, checkVectors, mediaParts, planRequests, type EmbeddingInput, type Role } from "./request.js";
 
 const PLUGIN_ID = "multimodal-embeddings";
 const PROVIDER_ID = "multimodal-embeddings";
@@ -42,14 +42,24 @@ function createProvider(settings: PluginSettings) {
             return buildRequestInput(input, role, modelSettings, media);
           }),
         );
-        const vectors = await fetchRemoteEmbeddingVectors({
-          url,
-          headers: client.headers,
-          ssrfPolicy: client.ssrfPolicy,
-          signal,
-          body: { model: client.model, input: body },
-          errorPrefix: `${PROVIDER_ID} embeddings`,
-        });
+        const post = (requestBody: { model: string } & Record<string, unknown>) =>
+          fetchRemoteEmbeddingVectors({
+            url,
+            headers: client.headers,
+            ssrfPolicy: client.ssrfPolicy,
+            signal,
+            body: requestBody as { model: string; input: unknown[] },
+            errorPrefix: `${PROVIDER_ID} embeddings`,
+          });
+        const plan = planRequests(slice, modelSettings.mediaFormat);
+        const vectors: number[][] = new Array(slice.length);
+        if (plan.batched.length > 0) {
+          const batch = await post({ model: client.model, input: plan.batched.map((j) => body[j]) });
+          checkVectors(batch, plan.batched.length).forEach((v, k) => (vectors[plan.batched[k]] = v));
+        }
+        for (const j of plan.single) {
+          vectors[j] = checkVectors(await post(chatMessagesBody(client.model, body[j])), 1)[0];
+        }
         out.push(...checkVectors(vectors, slice.length, modelSettings.dimensions));
       }
       return out;

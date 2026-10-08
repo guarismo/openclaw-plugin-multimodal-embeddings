@@ -152,6 +152,12 @@ describe("resolveModelSettings", () => {
     }
   });
 
+  it("accepts chat-messages as mediaFormat and defaults to content-parts", () => {
+    expect(resolveModelSettings(s({ m: { mediaFormat: "chat-messages" } }), "m").mediaFormat).toBe("chat-messages");
+    expect(resolveModelSettings(s({ m: { mediaFormat: "other" } }), "m").mediaFormat).toBe("content-parts");
+    expect(resolveModelSettings(s({ m: {} }), "m").mediaFormat).toBe("content-parts");
+  });
+
   it("treats dimensions below 1 as unset", () => {
     expect(resolveModelSettings(s({ m: { dimensions: 0.5 } }), "m").dimensions).toBeUndefined();
   });

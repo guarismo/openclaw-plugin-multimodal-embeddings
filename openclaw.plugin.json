@@ -2,7 +2,7 @@
   "id": "multimodal-embeddings",
   "name": "Multimodal Embeddings (OpenAI-compatible)",
   "description": "Memory embedding provider for any OpenAI-compatible /v1/embeddings server, with image and audio indexing for models that support it (e.g. EmbeddingGemma 2 on llama.cpp).",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "activation": {
     "onStartup": true
   },
@@ -37,9 +37,10 @@
             },
             "mediaFormat": {
               "enum": [
-                "content-parts"
+                "content-parts",
+                "chat-messages"
               ],
-              "description": "Request shape for media inputs. content-parts: llama.cpp / OpenRouter {content:[...]} objects."
+              "description": "Request shape for media inputs. content-parts (default): llama.cpp / OpenRouter {content:[...]} objects in a batched input array. chat-messages: vLLM, one {messages:[{role:'user',content:[...]}]} request per media input."
             },
             "preset": {
               "enum": [

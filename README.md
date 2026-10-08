@@ -87,7 +87,7 @@ Set these under `plugins.entries["multimodal-embeddings"].config`.
 | --- | --- | --- | --- |
 | `models` | object | none | Per-model settings, keyed by the model id sent to the server. Use `"*"` as a fallback for models without their own entry. An exact entry is not merged with `"*"`. |
 | `models.<id>.modalities` | array of `"image"`, `"audio"` | `[]` | Media this model can embed in the same space as text. Omit for a text-only model. |
-| `models.<id>.mediaFormat` | `"content-parts"` | `"content-parts"` | Request shape for media. `content-parts` is the llama.cpp / OpenRouter `{content:[...]}` format. |
+| `models.<id>.mediaFormat` | `"content-parts"` \| `"chat-messages"` | `"content-parts"` | Request shape for media. `content-parts`: llama.cpp / OpenRouter `{content:[...]}` objects in a batched `input` array. `chat-messages`: vLLM, one `{messages:[{role:"user",content:[...]}]}` request per media input; text stays batched. |
 | `models.<id>.preset` | `"none"`, `"embeddinggemma"` | `embeddinggemma` if the model id contains "embeddinggemma" (any case), else `none` | Built-in prompt prefixes. |
 | `models.<id>.queryPrefix` | string | from preset | Overrides the preset's query prefix. |
 | `models.<id>.documentPrefix` | string | from preset | Overrides the preset's document prefix. |
@@ -147,7 +147,7 @@ Notes:
 - Qwen3-VL-Embedding and GME document their instruction as a chat system message; the plugin sends it as a text prefix, which worked in this test but is not their documented format.
 - Other servers:
   - **Ollama 0.40.0** (`/v1/embeddings`): text works (embeddinggemma, qwen3-embedding:0.6b, nomic-embed-text and bge-m3 gave the same results as on llama.cpp). Media does not: the endpoint rejects content parts ("input.content must be a string"), and Ollama's `embeddinggemma-2` builds run only on its MLX engine, so they do not load on Linux/NVIDIA at all.
-  - **vLLM 0.31.0** (`/v1/embeddings`, `--runner pooling`) with Qwen3-VL-Embedding-2B: text works (8/8). Media sent as content parts in `input` is rejected; vLLM takes one media item per request in a chat-style `messages` field instead. With that format the same model found 9/9 images, so vLLM needs a second request format in the plugin, which it does not have yet. On a 6 GB card vLLM also needed `--enforce-eager`, `--limit-mm-per-prompt '{"image":1,"video":0}'` and a `max_pixels` cap to start.
+  - **vLLM 0.31.0** (`/v1/embeddings`, `--runner pooling`) with Qwen3-VL-Embedding-2B: 8/8 text and 9/9 images with `mediaFormat: "chat-messages"` (vLLM rejects content parts in `input`; it takes one media item per request in a chat-style `messages` field). On a 6 GB card vLLM needed `--enforce-eager`, `--limit-mm-per-prompt '{"image":1,"video":0}'` and `--mm-processor-kwargs '{"max_pixels":802816}'` to start.
   - LM Studio and OpenRouter were not tested.
 - Only EmbeddingGemma 2 was also tested end to end through OpenClaw memory indexing and `multimodal_media_search`.
 
